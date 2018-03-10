@@ -40,6 +40,9 @@ public class DnsProxy {
         final long staleResponseTimeout = Long.parseLong(config.getOrDefault("staleResponseTimeout", "1000"));
         final int packetQueueLength = Integer.parseInt(config.getOrDefault("packetQueueLength", "100"));
 
+        final String cacheFile = config.get("cacheFile");
+        final long cacheDelayMinutes = Long.parseLong(config.getOrDefault("cacheDelayMinutes", "60"));
+
         final String[] resolvers = config.getOrDefault("resolvers", "https://dns.google.com/experimental?ct#name=dns.google.com").split("\\s+");
         if (!config.containsKey("maxRetries"))
             config.put("maxRetries", String.valueOf(resolvers.length * 2));
@@ -54,7 +57,8 @@ public class DnsProxy {
         final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(40);
         final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
-        final CacheResolver resolver = new CacheResolver(minTtl, staleResponseTtl, staleResponseTimeout, packetQueueLength, executor, scheduledExecutorService)
+        final CacheResolver resolver = new CacheResolver(minTtl, staleResponseTtl, staleResponseTimeout, packetQueueLength,
+                executor, scheduledExecutorService, cacheFile, cacheDelayMinutes)
                 .startQueueProcessingResolvers(queueProcessingResolvers);
 
         final List<Listener> listeners = Arrays.stream(config.getOrDefault("listeners", "tcp://127.0.0.1:5353 udp://127.0.0.1:5353").split("\\s+"))

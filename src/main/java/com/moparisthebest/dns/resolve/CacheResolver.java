@@ -3,6 +3,11 @@ package com.moparisthebest.dns.resolve;
 import com.moparisthebest.dns.dto.Packet;
 import com.moparisthebest.dns.dto.Question;
 
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.concurrent.*;
 
 import static com.moparisthebest.dns.Util.supplyAsyncOnTimeOut;
@@ -16,15 +21,27 @@ public class CacheResolver implements Resolver, AutoCloseable {
     private final ExecutorService executor;
     private final ScheduledExecutorService scheduledExecutorService;
 
-    private final ConcurrentMap<Object, CachedPacket> cache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CachedPacket> cache = new ConcurrentHashMap<>();
 
-    public CacheResolver(final int minTtl, final int staleResponseTtl, final long staleResponseTimeout, final int packetQueueLength, final ExecutorService executor, final ScheduledExecutorService scheduledExecutorService) {
+    public CacheResolver(final int minTtl, final int staleResponseTtl, final long staleResponseTimeout, final int packetQueueLength, final ExecutorService executor, final ScheduledExecutorService scheduledExecutorService,
+                         final String cacheFile, final long cacheDelayMinutes) throws IOException {
         this.minTtl = minTtl;
         this.staleResponseTtl = staleResponseTtl;
         this.staleResponseTimeout = staleResponseTimeout;
         this.queue = packetQueueLength < 1 ? new LinkedBlockingQueue<>() : new ArrayBlockingQueue<>(packetQueueLength);
         this.executor = executor;
         this.scheduledExecutorService = scheduledExecutorService;
+        if(cacheFile != null && !cacheFile.isEmpty()) {
+            final File cacheFileFile = new File(cacheFile);
+            readCache(cacheFileFile, cache);
+            scheduledExecutorService.scheduleWithFixedDelay(() -> {
+                try {
+                    persistCache(cacheFileFile, cache);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }, cacheDelayMinutes, cacheDelayMinutes, TimeUnit.MINUTES);
+        }
     }
 
     public CacheResolver startQueueProcessingResolvers(final Iterable<QueueProcessingResolver> queueProcessingResolvers) {
@@ -150,5 +167,42 @@ public class CacheResolver implements Resolver, AutoCloseable {
     @Override
     public Packet resolve(final Packet request) throws Exception {
         return resolveAsync(new BaseRequestResponse(request)).get().getResponse();
+    }
+
+    public void persistCache(final File file, final Map<String, CachedPacket> cache) throws IOException {
+        final File tmpFile = new File(file.getAbsolutePath() + ".tmp");
+        try(FileOutputStream fos = new FileOutputStream(tmpFile);
+            DataOutputStream dos = new DataOutputStream(fos)) {
+            for(final Map.Entry<String, CachedPacket> entry : cache.entrySet()) {
+
+                dos.writeUTF(entry.getKey());
+
+                final CachedPacket cp = entry.getValue();
+
+                final byte[] rawCopy = cp.response.copyRaw();
+                dos.writeInt(rawCopy.length);
+                dos.write(rawCopy);
+
+                dos.writeLong(cp.receivedSeconds);
+                dos.writeLong(cp.expiredSeconds);
+            }
+        }
+        // after the file is fully written, move it into place, should be atomic
+        Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public void readCache(final File file, final Map<String, CachedPacket> cache) throws IOException {
+        if(file.exists())
+        try(FileInputStream fis = new FileInputStream(file);
+            DataInputStream dis = new DataInputStream(fis)) {
+            final String key = dis.readUTF();
+            final byte[] packet = new byte[dis.readInt()];
+            dis.readFully(packet);
+            cache.put(key, new CachedPacket(
+                    new Packet(ByteBuffer.wrap(packet), 0, packet.length),
+                    dis.readLong(), dis.readLong()));
+        } catch(EOFException e) {
+            // ignore this, we just hit end of file
+        }
     }
 }

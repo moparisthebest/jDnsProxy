@@ -12,7 +12,7 @@ public class BaseRequestResponse implements RequestResponse {
     private Packet request, response;
 
     private CompletableFuture<? extends RequestResponse> completableFuture;
-    private Object requestPacketKey;
+    private String requestPacketKey;
     private int failureCount;
 
     public BaseRequestResponse() {
@@ -52,12 +52,12 @@ public class BaseRequestResponse implements RequestResponse {
     }
 
     @Override
-    public Object getRequestPacketKey() {
+    public String getRequestPacketKey() {
         return requestPacketKey;
     }
 
     @Override
-    public void setRequestPacketKey(final Object requestPacketKey) {
+    public void setRequestPacketKey(final String requestPacketKey) {
         this.requestPacketKey = requestPacketKey;
     }
 

@@ -28,7 +28,7 @@ public class Packet extends AbstractBufferWindow {
             throw new RuntimeException("header too short");
     }
 
-    private Packet(final ByteBuffer buf, final int start, final int end) {
+    public Packet(final ByteBuffer buf, final int start, final int end) {
         super(buf, start);
         this.end = end;
     }
@@ -235,9 +235,18 @@ public class Packet extends AbstractBufferWindow {
 
     public Packet copy() {
         final ByteBuffer copy = ByteBuffer.allocate(getEnd() - start);
+        final ByteBuffer buf = this.buf.duplicate();
         buf.position(start);
         copy.put(buf);
         return new Packet(copy, start, end);
+    }
+
+    public byte[] copyRaw() {
+        final byte[] copy = new byte[getEnd() - start];
+        final ByteBuffer buf = this.buf.duplicate();
+        buf.position(start);
+        buf.get(copy);
+        return copy;
     }
 
     public String getDohBase64() {

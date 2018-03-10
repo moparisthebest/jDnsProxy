@@ -18,7 +18,7 @@ public interface RequestResponse {
      */
     CompletableFuture<? extends RequestResponse> getCompletableFuture();
     void setCompletableFuture(CompletableFuture<? extends RequestResponse> completableFuture);
-    Object getRequestPacketKey();
-    void setRequestPacketKey(Object key);
+    String getRequestPacketKey();
+    void setRequestPacketKey(String key);
     int getAndIncrementFailureCount();
 }
