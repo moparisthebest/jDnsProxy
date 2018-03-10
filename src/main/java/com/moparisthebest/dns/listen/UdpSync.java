@@ -40,10 +40,14 @@ public class UdpSync implements Listener {
                 final UdpRequestResponse requestResponse = new UdpRequestResponse(request.getSocketAddress(),
                         new Packet(ByteBuffer.wrap(request.getData(), request.getOffset(), request.getLength()).slice()));
                 //System.out.println(requestResponse);
-                //debugPacket(request.getData());
+                //debugPacket(requestResponse.getRequest().getBuf());
 
-                resolver.resolveAsync(requestResponse).thenAcceptAsync((urr) -> {
-                    //debugPacket(bc.getResponse().getBuf().array());
+                resolver.resolveAsync(requestResponse).whenCompleteAsync((urr, t) -> {
+                    if(t != null) {
+                        t.printStackTrace();
+                        return;
+                    }
+                    //debugPacket(urr.getResponse().getBuf());
 
                     //System.out.println("got response");
                     final byte[] response = urr.getResponse().getBuf().array();

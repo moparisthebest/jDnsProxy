@@ -5,11 +5,9 @@ import com.moparisthebest.dns.net.ParsedUrl;
 import com.moparisthebest.dns.resolve.CacheResolver;
 import com.moparisthebest.dns.resolve.QueueProcessingResolver;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -20,11 +18,20 @@ public class DnsProxy {
     public static void main(String[] args) throws Throwable {
 
         final Map<String, String> config;
-        try (FileInputStream fis = new FileInputStream(args.length > 0 ? args[0] : "jdnsproxy.properties")) {
-            final Properties props = new Properties();
-            props.load(fis);
-            @SuppressWarnings("unchecked") final Map<String, String> configUnchecked = (Map<String, String>) (Object) props;
-            config = configUnchecked;
+        final File propsFile = new File(args.length > 0 ? args[0] : "jdnsproxy.properties");
+        if(propsFile.canRead()) {
+            try (FileInputStream fis = new FileInputStream(propsFile)) {
+                final Properties props = new Properties();
+                props.load(fis);
+                @SuppressWarnings("unchecked") final Map<String, String> configUnchecked = (Map<String, String>) (Object) props;
+                config = configUnchecked;
+            }
+        } else {
+            if(args.length > 0) {
+                System.err.printf("Error: config file '%s' does not exist or can't be read%n", args[0]);
+                return;
+            }
+            config = Collections.emptyMap();
         }
         System.out.println("config:" + config);
 
@@ -44,8 +51,8 @@ public class DnsProxy {
         //queueProcessingResolvers.add(new SocketResolver(5, "socket1", SocketFactory.getDefault(), new InetSocketAddress("8.8.4.4", 53)));
         //queueProcessingResolvers.add(new HttpResolver(5, "http1", "https://dns.google.com/experimental?ct"));
 
-        final ExecutorService executor = ForkJoinPool.commonPool();
-        final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(8);
+        final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(40);
+        final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
         final CacheResolver resolver = new CacheResolver(minTtl, staleResponseTtl, staleResponseTimeout, packetQueueLength, executor, scheduledExecutorService)
                 .startQueueProcessingResolvers(queueProcessingResolvers);

@@ -63,13 +63,19 @@ public class Util {
     /*
     // temp debug code
 
-    public static void debugPacket(final byte[] packet) {
-        System.out.println(Base64.getUrlEncoder().encodeToString(packet));
+    public static void debugPacket(ByteBuffer packet) {
+        //if(true) return;
+        int position = packet.position();
+        packet.position(0);
+        //System.out.println(Base64.getUrlEncoder().encodeToString(packet.array()));
         //System.out.println(new Packet(ByteBuffer.wrap(packet, 2, packet.length - 2).slice()));
-        System.out.println(new Packet(ByteBuffer.wrap(packet).slice()));
-        printPrettyHexBytes(ByteBuffer.wrap(packet));
-        printPrettyChars(packet);
-        printPrettyDecimalUnsignedBytes(ByteBuffer.wrap(packet));
+        //packet.mark();
+        System.out.println(new Packet(packet.slice()));
+        //printPrettyHexBytes(packet);
+        //printPrettyChars(packet);
+        //printPrettyDecimalUnsignedBytes(packet);
+        packet.position(position);
+        //packet.reset();
     }
 
     public static void printPrettyHexBytes(ByteBuffer bytes) {
@@ -89,10 +95,12 @@ public class Util {
         System.out.println("+++++++++++++++++++++++++++++");
     }
 
-    public static void printPrettyChars(final byte[] bytes) {
+    public static void printPrettyChars(ByteBuffer bytes) {
+        bytes = bytes.slice();
         System.out.println("-----------------------------");
         int count = 0;
-        for (final byte b : bytes) {
+        for (int x = 0; x < bytes.limit(); ++x) {
+            final byte b = bytes.get(x);
             System.out.printf("%02X(%c) ", b, (char) b);
             if (++count == 8) {
                 System.out.println();

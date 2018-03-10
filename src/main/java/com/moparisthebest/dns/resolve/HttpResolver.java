@@ -12,6 +12,7 @@ import static com.moparisthebest.dns.Util.readPacket;
 public class HttpResolver extends AbstractQueueProcessingResolver {
     private final OpenConnection openConnection;
     private final int connectTimeout;
+    private final int readTimeout = 4000;
 
     interface OpenConnection {
         HttpURLConnection open() throws Exception;
@@ -47,6 +48,7 @@ public class HttpResolver extends AbstractQueueProcessingResolver {
         final HttpURLConnection conn = openConnection.open();
 
         conn.setConnectTimeout(connectTimeout);
+        conn.setReadTimeout(readTimeout);
         conn.setUseCaches(false);
         conn.setDoInput(true);
         conn.setDoOutput(true);

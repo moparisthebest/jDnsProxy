@@ -16,6 +16,7 @@ import static com.moparisthebest.dns.Util.writeTcpPacket;
 
 public class SocketResolver extends AbstractQueueProcessingResolver {
     private final OpenSocket openConnection;
+    private final int readTimeout = 4000;
 
     interface OpenSocket {
         Socket open() throws Exception;
@@ -104,6 +105,8 @@ public class SocketResolver extends AbstractQueueProcessingResolver {
                  DataInputStream upDis = new DataInputStream(upIs);
                  OutputStream upOs = upstream.getOutputStream();
                  DataOutputStream upDos = new DataOutputStream(upOs)) {
+
+                upstream.setSoTimeout(readTimeout);
 
                 writeTcpPacket(request, upDos);
                 upDos.flush();

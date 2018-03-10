@@ -41,10 +41,15 @@ public class TcpAsync implements Listener {
                 try {
                     bufChan.buf.flip();
                     bufChan.setRequest(new Packet(bufChan.buf));
-                    //debugPacket(bufChan.getRequest().getBuf().array());
+                    //debugPacket(bufChan.getRequest().getBuf());
 
-                    resolver.resolveAsync(bufChan).thenAcceptAsync((bc) -> {
-                        //debugPacket(bc.getResponse().getBuf().array());
+                    resolver.resolveAsync(bufChan).whenCompleteAsync((bc, t) -> {
+                        //System.out.println("got completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        if(t != null) {
+                            t.printStackTrace();
+                            return;
+                        }
+                        //debugPacket(bc.getResponse().getBuf());
 
                         bc.tcpHead.clear();
                         bc.tcpHead.putShort((short) bc.getResponse().getBuf().capacity());

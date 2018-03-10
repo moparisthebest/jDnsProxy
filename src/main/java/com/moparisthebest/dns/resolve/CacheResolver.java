@@ -110,8 +110,17 @@ public class CacheResolver implements Resolver, AutoCloseable {
                 return CompletableFuture.completedFuture(requestResponse);
             }
         }
+        //System.out.println("no cachedPacket, querying upstream!");
         requestResponse.setRequestPacketKey(key);
         return requestAndCache(requestResponse);
+        /*
+        // todo: should not have to do this, some upstreams seem to eat stuff though, figure that out, I think readTimeout fixed this
+        final CompletableFuture<E> request = requestAndCache(requestResponse);
+        final CompletableFuture<E> abort = supplyAsyncOnTimeOut(scheduledExecutorService, 15000, TimeUnit.MILLISECONDS, () -> {
+            throw new RuntimeException("timed out cause upstream ate us");
+        });
+        return request.applyToEitherAsync(abort, s -> s);
+        */
     }
 
     //boolean first = true;

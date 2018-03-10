@@ -212,6 +212,9 @@ public class Packet extends AbstractBufferWindow {
                     lowestTtl = rrTtl;
             }
         }
+        if(lowestTtl == Integer.MAX_VALUE)
+            lowestTtl = 5; // todo: what is proper when no TTLs are available?
+        //System.out.println("lowestTtl: " + lowestTtl);
         return lowestTtl;
     }
 
@@ -238,7 +241,7 @@ public class Packet extends AbstractBufferWindow {
     }
 
     public String getDohBase64() {
-        // todo: remove trailing equals
+        // todo: remove trailing equals, this goes outside limit...
         return Base64.getUrlEncoder().encodeToString(getBuf().array());
     }
 
@@ -269,7 +272,7 @@ public class Packet extends AbstractBufferWindow {
                 ", start=" + getStart() +
                 ", end=" + getEnd() +
                 ", length=" + getLength() +
-                ", dohBase64=" + getDohBase64() +
+                //", dohBase64=" + getDohBase64() +
                 '}';
     }
 }
