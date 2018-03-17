@@ -1,14 +1,15 @@
 jDnsProxy
 ---------
 Simple fast and lightweight DNS proxy and cache that listens on TCP or UDP ports and relays the request
-to various upstream DNS-over-TCP, DNS-over-TLS, or DNS-over-HTTPS servers, optionally over http or socks 
+to various upstream [DNS-over-TCP](https://tools.ietf.org/html/rfc1035), [DNS-over-TLS](https://tools.ietf.org/html/rfc7858),
+or [DNS-over-HTTPS](https://tools.ietf.org/html/draft-hoffman-dns-over-https) servers, optionally over http or socks 
 proxies (like tor), and optionally pinning public keys for complete TLS security.  Implements a simple 
-response cache respecting TTLs but also implementing proper Serve-Stale functionality.
+response cache respecting TTLs but also implementing proper [Serve-Stale](https://tools.ietf.org/html/draft-ietf-dnsop-serve-stale) functionality.
 
 This should support any current and future DNS record generically, as well as providing full DNSSEC support if upstream
 resolvers do.
 
-Sample/default configuration is in jdnsproxy.properties and should be documented clearly there.
+Sample/default configuration is in [jdnsproxy.properties](https://github.com/moparisthebest/jDnsProxy/blob/master/jdnsproxy.properties) and should be documented clearly there.
 
 Build/run like so:
 ```
@@ -19,8 +20,9 @@ java -jar target/jDnsProxy.jar ./jdnsproxy.properties
 Implemented specs:
 
   * [RFC-1035: DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION](https://tools.ietf.org/html/rfc1035)
-  * [Draft: Serving Stale Data to Improve DNS Resiliency](https://tools.ietf.org/html/draft-ietf-dnsop-serve-stale)
+  * [RFC-7858: Specification for DNS over Transport Layer Security (TLS)](https://tools.ietf.org/html/rfc7858)
   * [Draft: DNS Queries over HTTPS](https://tools.ietf.org/html/draft-hoffman-dns-over-https)
+  * [Draft: Serving Stale Data to Improve DNS Resiliency](https://tools.ietf.org/html/draft-ietf-dnsop-serve-stale)
   * [RFC-6891: Extension Mechanisms for DNS (EDNS(0))](https://tools.ietf.org/html/rfc6891)
   * [DNS EDNS0 Option Codes (OPT)](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-11)
   * [RFC-3225: Indicating Resolver Support of DNSSEC](https://tools.ietf.org/html/rfc3225)
