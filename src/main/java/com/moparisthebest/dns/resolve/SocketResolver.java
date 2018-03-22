@@ -18,6 +18,8 @@ public class SocketResolver extends AbstractQueueProcessingResolver {
     private final OpenSocket openConnection;
     private final int readTimeout = 4000;
 
+    private Socket activeSocket;
+
     interface OpenSocket {
         Socket open() throws Exception;
     }
@@ -83,6 +85,23 @@ public class SocketResolver extends AbstractQueueProcessingResolver {
                 }
             };
         }
+
+        try {
+            this.getSocket();
+        } catch (Exception e) {
+            System.err.println("Failed to open socket to " + name);
+            e.printStackTrace();
+        }
+    }
+
+    private Socket getSocket() throws Exception {
+        if (this.activeSocket == null || this.activeSocket.isClosed()) {
+            this.activeSocket = openConnection.open();
+            this.activeSocket.setKeepAlive(true);
+            this.activeSocket.setSoTimeout(readTimeout);
+        }
+
+        return this.activeSocket;
     }
 
     @Override
@@ -100,14 +119,12 @@ public class SocketResolver extends AbstractQueueProcessingResolver {
             upstream.connect(endpoint, 500);
                 */
 
-            try (Socket upstream = openConnection.open();
-                 InputStream upIs = upstream.getInputStream();
+            Socket upstream = this.getSocket();
+
+            try (InputStream upIs = upstream.getInputStream();
                  DataInputStream upDis = new DataInputStream(upIs);
                  OutputStream upOs = upstream.getOutputStream();
                  DataOutputStream upDos = new DataOutputStream(upOs)) {
-
-                upstream.setSoTimeout(readTimeout);
-
                 writeTcpPacket(request, upDos);
                 upDos.flush();
 
