@@ -43,4 +43,4 @@ openssl s_client -connect 'dns.google.com:443' 2>&1 < /dev/null | sed -n '/-----
 
 License
 -------
-GNU/GPLv3 for now, ping me if you think it should be something else, I don't care much.
+MIT License, refer to LICENSE.txt
