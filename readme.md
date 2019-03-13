@@ -14,18 +14,22 @@ Sample/default configuration is in [jdnsproxy.properties](https://github.com/mop
 Build/run like so:
 ```
 mvn clean package
-java -jar target/jDnsProxy.jar ./jdnsproxy.properties
+java -jar jDnsProxy/target/jDnsProxy.jar ./jdnsproxy.properties
+
+# or with xmpp:// listener+resolver support:
+java -cp jDnsProxy/target/jDnsProxy.jar:xmpp-dox/target/xmpp-dox.jar com.moparisthebest.dns.DnsProxy xmpp-dox/jdnsproxy.xmpp.resolver.properties
 ```
 
 Implemented specs:
 
   * [RFC-1035: DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION](https://tools.ietf.org/html/rfc1035)
   * [RFC-7858: Specification for DNS over Transport Layer Security (TLS)](https://tools.ietf.org/html/rfc7858)
-  * [Draft: DNS Queries over HTTPS](https://tools.ietf.org/html/draft-hoffman-dns-over-https)
+  * [RFC 8484: DNS Queries over HTTPS (DoH)](http://tools.ietf.org/html/rfc8484)
   * [Draft: Serving Stale Data to Improve DNS Resiliency](https://tools.ietf.org/html/draft-ietf-dnsop-serve-stale)
   * [RFC-6891: Extension Mechanisms for DNS (EDNS(0))](https://tools.ietf.org/html/rfc6891)
   * [DNS EDNS0 Option Codes (OPT)](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-11)
   * [RFC-3225: Indicating Resolver Support of DNSSEC](https://tools.ietf.org/html/rfc3225)
+  * [XEP-xxxx: DNS Queries over XMPP (DoX)](https://xmpp.org/extensions/inbox/dox.html)
 
 Use these for quick testing:
 ```
