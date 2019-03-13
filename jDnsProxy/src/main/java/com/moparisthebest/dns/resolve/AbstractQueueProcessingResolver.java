@@ -30,17 +30,6 @@ public abstract class AbstractQueueProcessingResolver implements QueueProcessing
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse) {
-        return null;
-        /*
-        return CompletableFuture.supplyAsync(() -> {
-            requestResponse.setResponse(resolve(requestResponse.getRequest()));
-            return requestResponse;
-        }, executor);
-        */
-    }
-
-    @Override
     public void run() {
         thisThread = Thread.currentThread();
         if (running)

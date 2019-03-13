@@ -14,7 +14,7 @@ import static com.moparisthebest.dns.Util.readTcpPacket;
 import static com.moparisthebest.dns.Util.tryClose;
 import static com.moparisthebest.dns.Util.writeTcpPacket;
 
-public class SocketResolver extends AbstractQueueProcessingResolver {
+public class SocketResolver implements Resolver {
     private final OpenSocket openConnection;
     private final int readTimeout = 4000;
 
@@ -22,8 +22,7 @@ public class SocketResolver extends AbstractQueueProcessingResolver {
         Socket open() throws Exception;
     }
 
-    public SocketResolver(final int maxRetries, final String name, final SocketAddress endpoint, final int connectTimeout, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
-        super(maxRetries, name);
+    public SocketResolver(final SocketAddress endpoint, final int connectTimeout, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
         if(proxy == null && sslSocketFactory == null) {
             openConnection = () -> {
                 Socket s = null;

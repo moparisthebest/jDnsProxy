@@ -1,14 +1,9 @@
 package com.moparisthebest.dns.resolve;
 
-import com.moparisthebest.dns.dto.Packet;
 import com.moparisthebest.dns.net.ParsedUrl;
 
-import javax.net.SocketFactory;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 public interface QueueProcessingResolver extends Resolver, Runnable, AutoCloseable {
@@ -27,15 +22,6 @@ public interface QueueProcessingResolver extends Resolver, Runnable, AutoCloseab
         String name = parsedUrl.getProps().get("name");
         if(name == null)
             name = parsedUrl.getUri().toString();
-        final int connectTimeout = Integer.parseInt(parsedUrl.getProps().getOrDefault("connectTimeout", "500"));
-        switch(parsedUrl.getProtocol()) {
-            case "tcp":
-            case "tls":
-                return new SocketResolver(maxRetries, name, parsedUrl.getAddr(), connectTimeout, parsedUrl.getProxy(), parsedUrl.getSslSocketFactory());
-            case "http":
-            case "https":
-                return new HttpResolver(maxRetries, name, parsedUrl.getUrlWithoutFragment(), connectTimeout, parsedUrl.getProxy(), parsedUrl.getSslSocketFactory());
-        }
-        throw new IllegalArgumentException("invalid listener format");
+        return new DelegatingQueueProcessingResolver(maxRetries, name, Resolver.of(parsedUrl));
     }
 }

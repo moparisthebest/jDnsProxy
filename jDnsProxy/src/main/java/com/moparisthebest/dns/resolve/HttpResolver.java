@@ -9,7 +9,7 @@ import java.net.*;
 
 import static com.moparisthebest.dns.Util.readPacket;
 
-public class HttpResolver extends AbstractQueueProcessingResolver {
+public class HttpResolver implements Resolver {
     private final OpenConnection openConnection;
     private final int connectTimeout;
     private final int readTimeout = 4000;
@@ -18,8 +18,7 @@ public class HttpResolver extends AbstractQueueProcessingResolver {
         HttpURLConnection open() throws Exception;
     }
 
-    public HttpResolver(final int maxRetries, final String name, final URL url, final int connectTimeout, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
-        super(maxRetries, name);
+    public HttpResolver(final URL url, final int connectTimeout, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
         this.connectTimeout = connectTimeout;
         if(proxy == null && sslSocketFactory == null) {
             openConnection = () -> (HttpURLConnection) url.openConnection();

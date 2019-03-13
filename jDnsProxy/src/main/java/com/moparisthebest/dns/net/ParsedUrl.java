@@ -11,13 +11,15 @@ import java.util.*;
 
 public class ParsedUrl {
 
+    private final String urlStr;
     private final SocketAddress addr;
     private final URI uri; // minus #
     private final Map<String, String> props; // after #, split by ;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
 
-    public ParsedUrl(final SocketAddress addr, final URI uri, final Map<String, String> props, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
+    public ParsedUrl(final String urlStr, final SocketAddress addr, final URI uri, final Map<String, String> props, final Proxy proxy, final SSLSocketFactory sslSocketFactory) {
+        this.urlStr = urlStr;
         this.addr = addr;
         this.uri = uri;
         this.props = props;
@@ -70,7 +72,7 @@ public class ParsedUrl {
             }
             if(sslSocketFactory == null && url.getScheme().equals("tls"))
                 sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            return new ParsedUrl(addr, url, props, proxy, sslSocketFactory);
+            return new ParsedUrl(urlStr, addr, url, props, proxy, sslSocketFactory);
         } catch (Exception e) {
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
@@ -102,6 +104,10 @@ public class ParsedUrl {
 
     public URL getUrlWithoutFragment() {
         return toUrlRemoveRef(uri);
+    }
+
+    public String getUrlStr() {
+        return urlStr;
     }
 
     public SocketAddress getAddr() {
