@@ -7,8 +7,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.moparisthebest.dns</groupId>
-    <artifactId>jDnsProxy</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>jDnsProxy-parent</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>
@@ -44,13 +44,9 @@
         <pushChanges>false</pushChanges>
         <localCheckout>true</localCheckout>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>eu.geekplace.javapinning</groupId>
-            <artifactId>java-pinning-java7</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>jDnsProxy</module>
+    </modules>
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
@@ -96,12 +92,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.moparisthebest.dns.DnsProxy</mainClass>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

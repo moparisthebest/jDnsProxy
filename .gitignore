@@ -2,3 +2,7 @@
 *.iml
 */target/
 target/
+
+dnscache.map
+jdnsproxy.custom*.properties
+*.diff
