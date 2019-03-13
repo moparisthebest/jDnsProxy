@@ -13,16 +13,16 @@ matrix:
       jdk: oraclejdk9
     - env: JDK='OpenJDK 10'
       install: . ./install-jdk.sh -F 10 -L GPL
-    - env: JDK='OracleJDK 10'
-      install: . ./install-jdk.sh -F 10 -L BCL
     - env: JDK='OpenJDK 11'
       install: . ./install-jdk.sh -F 11 -L GPL
-    - env: JDK='OracleJDK 11'
-      install: . ./install-jdk.sh -F 11 -L BCL
+    - env: JDK='OpenJDK 12'
+      install: . ./install-jdk.sh -F 12 -L GPL
+    - env: JDK='OpenJDK 13'
+      install: . ./install-jdk.sh -F 13 -L GPL
 
 before_install: wget https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh
 
 after_success:
   - if [[ "${JDK}" == 'OpenJDK 8' ]]; then
-      mvn deploy --settings .travis-settings.xml -DskipTests=true -B || travis_terminate 1;
+      mvn deploy --settings .travis-settings.xml -Dmaven.test.skip=true -B || travis_terminate 1;
     fi
