@@ -8,7 +8,14 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Resolver {
     default <E extends RequestResponse> CompletableFuture<E> resolveAsync(E requestResponse) {
-        return null;
+        try {
+            requestResponse.setResponse(resolve(requestResponse.getRequest()));
+            return CompletableFuture.completedFuture(requestResponse);
+        } catch (Exception e) {
+            final CompletableFuture<E> ret = new CompletableFuture<>();
+            ret.completeExceptionally(e);
+            return ret;
+        }
         /*
         return CompletableFuture.supplyAsync(() -> {
             requestResponse.setResponse(resolve(requestResponse.getRequest()));
@@ -17,7 +24,9 @@ public interface Resolver {
         */
     }
 
-    Packet resolve(Packet request) throws Exception;
+    default Packet resolve(Packet request) throws Exception {
+        return resolveAsync(new BaseRequestResponse(request)).get().getResponse();
+    }
 
     ServiceLoader<Services> services = ServiceLoader.load(Services.class);
 

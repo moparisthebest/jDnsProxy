@@ -164,11 +164,6 @@ public class CacheResolver implements Resolver, AutoCloseable {
         return request;
     }
 
-    @Override
-    public Packet resolve(final Packet request) throws Exception {
-        return resolveAsync(new BaseRequestResponse(request)).get().getResponse();
-    }
-
     public void persistCache(final File file, final Map<String, CachedPacket> cache) throws IOException {
         final File tmpFile = new File(file.getAbsolutePath() + ".tmp");
         try(FileOutputStream fos = new FileOutputStream(tmpFile);

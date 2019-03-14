@@ -4,6 +4,7 @@ import com.moparisthebest.dns.listen.Listener;
 import com.moparisthebest.dns.net.ParsedUrl;
 import com.moparisthebest.dns.resolve.CacheResolver;
 import com.moparisthebest.dns.resolve.QueueProcessingResolver;
+import com.moparisthebest.dns.resolve.Resolver;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,12 @@ import static com.moparisthebest.dns.Util.tryClose;
 public class DnsProxy {
 
     public static void main(String[] args) throws Throwable {
+
+        if (args.length == 2) {
+            // quick hack to run direct proxy todo: make this shut down clean
+            Listener.of(ParsedUrl.of(args[0]), Resolver.of(ParsedUrl.of(args[1])), ForkJoinPool.commonPool()).run();
+            return;
+        }
 
         final Map<String, String> config;
         final File propsFile = new File(args.length > 0 ? args[0] : "jdnsproxy.properties");
@@ -62,7 +69,7 @@ public class DnsProxy {
                 .startQueueProcessingResolvers(queueProcessingResolvers);
 
         final List<Listener> listeners = Arrays.stream(config.getOrDefault("listeners", "tcp://127.0.0.1:5353 udp://127.0.0.1:5353").split("\\s+"))
-                .map(url -> Listener.ofAndStart(url, resolver, executor)).collect(Collectors.toList());
+                .map(url -> Listener.ofAndStart(ParsedUrl.of(url), resolver, executor)).collect(Collectors.toList());
         //final List<Listener> listeners = new ArrayList<>();
         //listeners.add(Listener.ofAndStart("tcp://127.0.0.1:5556", resolver, executor));
         //listeners.add(Listener.ofAndStart("udp://127.0.0.1:5556", resolver, executor));

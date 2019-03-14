@@ -13,18 +13,17 @@ public interface Listener extends Runnable, AutoCloseable {
 
     ServiceLoader<Services> services = ServiceLoader.load(Services.class);
 
-    static Listener of(final String listener, final Resolver resolver, final ExecutorService executor) {
-        final ParsedUrl parsedUrl = ParsedUrl.of(listener);
+    static Listener of(final ParsedUrl parsedUrl, final Resolver resolver, final ExecutorService executor) {
         for (final Services s : services) {
             final Listener ret = s.getListener(parsedUrl, resolver, executor);
             if (ret != null)
                 return ret;
         }
-        throw new IllegalArgumentException("unhandled listener format: " + listener);
+        throw new IllegalArgumentException("unhandled listener format: " + parsedUrl.getUrlStr());
     }
 
-    public static Listener ofAndStart(final String listener, final Resolver resolver, final ExecutorService executor) {
-        final Listener ret = of(listener, resolver, executor);
+    public static Listener ofAndStart(final ParsedUrl parsedUrl, final Resolver resolver, final ExecutorService executor) {
+        final Listener ret = of(parsedUrl, resolver, executor);
         executor.execute(ret);
         return ret;
     }
