@@ -105,7 +105,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse) {
+    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
         final String key = calcRequestPacketKey(requestResponse.getRequest());
         //System.out.println("requestPacketKey: " + key);
         final CachedPacket response = cache.get(key);
@@ -115,7 +115,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
             if (response.isExpired(currentTime)) {
                 //System.out.println("cachedPacket isExpired!");
                 requestResponse.setRequestPacketKey(key);
-                final CompletableFuture<E> request = requestAndCache(requestResponse);
+                final CompletableFuture<E> request = requestAndCache(requestResponse, executor);
                 final CompletableFuture<E> stale = supplyAsyncOnTimeOut(scheduledExecutorService, staleResponseTimeout, TimeUnit.MILLISECONDS, () -> {
                     requestResponse.setResponse(response.getStaleResponse().setId(requestResponse.getRequest().getId()));
                     return requestResponse;
@@ -129,7 +129,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
         }
         //System.out.println("no cachedPacket, querying upstream!");
         requestResponse.setRequestPacketKey(key);
-        return requestAndCache(requestResponse);
+        return requestAndCache(requestResponse, executor);
         /*
         // todo: should not have to do this, some upstreams seem to eat stuff though, figure that out, I think readTimeout fixed this
         final CompletableFuture<E> request = requestAndCache(requestResponse);
@@ -142,7 +142,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
 
     //boolean first = true;
 
-    private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final E requestResponse) {
+    private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final E requestResponse, final Executor executor) {
         CompletableFuture<E> request = new CompletableFuture<>();
         requestResponse.setCompletableFuture(request);
         //if(first) {

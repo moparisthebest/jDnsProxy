@@ -43,7 +43,7 @@ public class TcpAsync implements Listener {
                     bufChan.setRequest(new Packet(bufChan.buf));
                     //debugPacket(bufChan.getRequest().getBuf());
 
-                    resolver.resolveAsync(bufChan).whenCompleteAsync((bc, t) -> {
+                    resolver.resolveAsync(bufChan, executor).whenCompleteAsync((bc, t) -> {
                         //System.out.println("got completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         if(t != null) {
                             t.printStackTrace();

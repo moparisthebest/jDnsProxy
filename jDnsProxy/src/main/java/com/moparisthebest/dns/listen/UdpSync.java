@@ -42,7 +42,7 @@ public class UdpSync implements Listener {
                 //System.out.println(requestResponse);
                 //debugPacket(requestResponse.getRequest().getBuf());
 
-                resolver.resolveAsync(requestResponse).whenCompleteAsync((urr, t) -> {
+                resolver.resolveAsync(requestResponse, executor).whenCompleteAsync((urr, t) -> {
                     if(t != null) {
                         t.printStackTrace();
                         return;

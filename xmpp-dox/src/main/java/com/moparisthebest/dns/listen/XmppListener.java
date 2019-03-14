@@ -51,7 +51,7 @@ public class XmppListener implements Listener {
                             //System.out.println("good request: " + req);
                             final XmppRequestResponse requestResponse = new XmppRequestResponse(req.getFrom(), new Packet(request));
 
-                            resolver.resolveAsync(requestResponse).whenCompleteAsync((urr, t) -> {
+                            resolver.resolveAsync(requestResponse, executor).whenCompleteAsync((urr, t) -> {
                                 if (t != null) {
                                     t.printStackTrace();
                                     return;
