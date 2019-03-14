@@ -50,6 +50,7 @@
     <modules>
         <module>jDnsProxy</module>
         <module>xmpp-dox</module>
+        <module>http-doh-listener</module>
     </modules>
     <build>
         <finalName>${project.artifactId}</finalName>
