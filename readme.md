@@ -29,7 +29,7 @@ Implemented specs:
   * [RFC-6891: Extension Mechanisms for DNS (EDNS(0))](https://tools.ietf.org/html/rfc6891)
   * [DNS EDNS0 Option Codes (OPT)](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-11)
   * [RFC-3225: Indicating Resolver Support of DNSSEC](https://tools.ietf.org/html/rfc3225)
-  * [XEP-xxxx: DNS Queries over XMPP (DoX)](https://xmpp.org/extensions/inbox/dox.html)
+  * [XEP-0418: DNS Queries over XMPP (DoX)](https://xmpp.org/extensions/xep-0418.html)
 
 Use these for quick testing:
 ```
