@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
  *
  * Ideally, implementations provide optimized versions of both the in-line and async call.
  */
-public interface Resolver {
+public interface Resolver extends AutoCloseable {
 
     /**
      * This must return immediately and resolve the DNS query in the background, using the given executor
@@ -43,6 +43,10 @@ public interface Resolver {
      */
     default Packet resolve(final Packet request) throws Exception {
         return resolveAsync(new BaseRequestResponse(request), Runnable::run).get().getResponse();
+    }
+
+    default void close() {
+        // do nothing by default
     }
 
     ServiceLoader<Services> services = ServiceLoader.load(Services.class);

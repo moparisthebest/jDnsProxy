@@ -50,11 +50,6 @@ public class CacheResolver implements Resolver, AutoCloseable {
         return this;
     }
 
-    @Override
-    public void close() {
-
-    }
-
     private class CachedPacket {
         final Packet response;
         final long receivedSeconds, expiredSeconds;

@@ -23,4 +23,10 @@ public class DelegatingQueueProcessingResolver extends AbstractQueueProcessingRe
     public Packet resolve(final Packet request) throws Exception {
         return delegate.resolve(request);
     }
+
+    @Override
+    public void close() {
+        super.close();
+        delegate.close();
+    }
 }
