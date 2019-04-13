@@ -63,7 +63,7 @@ public class DnsProxy {
         final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
         final CacheResolver resolver = new CacheResolver(
-                MinTtlResolver.of(minTtl,
+                MapResolver.minTtl(minTtl,
                     new BlockingQueueResolver(packetQueueLength)
                             .startQueueProcessingResolvers(executor, queueProcessingResolvers)
                 ),
