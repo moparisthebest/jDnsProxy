@@ -17,19 +17,18 @@ public class CacheResolver implements Resolver, AutoCloseable {
     private final int minTtl, staleResponseTtl;
     private final long staleResponseTimeout;
 
-    private final BlockingQueue<RequestResponse> queue;
-    private final ExecutorService executor;
+    private final Resolver delegate;
+
     private final ScheduledExecutorService scheduledExecutorService;
 
     private final ConcurrentMap<String, CachedPacket> cache = new ConcurrentHashMap<>();
 
-    public CacheResolver(final int minTtl, final int staleResponseTtl, final long staleResponseTimeout, final int packetQueueLength, final ExecutorService executor, final ScheduledExecutorService scheduledExecutorService,
+    public CacheResolver(final Resolver delegate, final int minTtl, final int staleResponseTtl, final long staleResponseTimeout, final ScheduledExecutorService scheduledExecutorService,
                          final String cacheFile, final long cacheDelayMinutes) throws IOException {
+        this.delegate = delegate;
         this.minTtl = minTtl;
         this.staleResponseTtl = staleResponseTtl;
         this.staleResponseTimeout = staleResponseTimeout;
-        this.queue = packetQueueLength < 1 ? new LinkedBlockingQueue<>() : new ArrayBlockingQueue<>(packetQueueLength);
-        this.executor = executor;
         this.scheduledExecutorService = scheduledExecutorService;
         if(cacheFile != null && !cacheFile.isEmpty()) {
             final File cacheFileFile = new File(cacheFile);
@@ -42,12 +41,6 @@ public class CacheResolver implements Resolver, AutoCloseable {
                 }
             }, cacheDelayMinutes, cacheDelayMinutes, TimeUnit.MINUTES);
         }
-    }
-
-    public CacheResolver startQueueProcessingResolvers(final Iterable<QueueProcessingResolver> queueProcessingResolvers) {
-        for(final QueueProcessingResolver queueProcessingResolver : queueProcessingResolvers)
-            queueProcessingResolver.start(this.executor, this.queue);
-        return this;
     }
 
     private class CachedPacket {
@@ -135,15 +128,8 @@ public class CacheResolver implements Resolver, AutoCloseable {
         */
     }
 
-    //boolean first = true;
-
     private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final E requestResponse, final Executor executor) {
-        CompletableFuture<E> request = new CompletableFuture<>();
-        requestResponse.setCompletableFuture(request);
-        //if(first) {
-            //first = false;
-            queue.add(requestResponse);
-        //}
+        CompletableFuture<E> request = delegate.resolveAsync(requestResponse, executor);
         if(minTtl > 0) {
             request = request.thenApply(s -> {
                 s.getResponse().modTtls((ttl) -> Math.max(ttl, minTtl));

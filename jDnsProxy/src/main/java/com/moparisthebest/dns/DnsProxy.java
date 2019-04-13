@@ -2,6 +2,7 @@ package com.moparisthebest.dns;
 
 import com.moparisthebest.dns.listen.Listener;
 import com.moparisthebest.dns.net.ParsedUrl;
+import com.moparisthebest.dns.resolve.BlockingQueueResolver;
 import com.moparisthebest.dns.resolve.CacheResolver;
 import com.moparisthebest.dns.resolve.QueueProcessingResolver;
 import com.moparisthebest.dns.resolve.Resolver;
@@ -64,9 +65,11 @@ public class DnsProxy {
         final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(40);
         final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
-        final CacheResolver resolver = new CacheResolver(minTtl, staleResponseTtl, staleResponseTimeout, packetQueueLength,
-                executor, scheduledExecutorService, cacheFile, cacheDelayMinutes)
-                .startQueueProcessingResolvers(queueProcessingResolvers);
+        final CacheResolver resolver = new CacheResolver(
+                new BlockingQueueResolver(packetQueueLength).startQueueProcessingResolvers(executor, queueProcessingResolvers),
+                minTtl, staleResponseTtl, staleResponseTimeout,
+                scheduledExecutorService, cacheFile, cacheDelayMinutes)
+                ;
 
         final List<Listener> listeners = Arrays.stream(config.getOrDefault("listeners", "tcp://127.0.0.1:5353 udp://127.0.0.1:5353").split("\\s+"))
                 .map(url -> Listener.ofAndStart(ParsedUrl.of(url), resolver, executor)).collect(Collectors.toList());
