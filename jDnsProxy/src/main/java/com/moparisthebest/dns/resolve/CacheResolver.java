@@ -14,7 +14,7 @@ import static com.moparisthebest.dns.Util.supplyAsyncOnTimeOut;
 
 public class CacheResolver implements Resolver, AutoCloseable {
 
-    private final int minTtl, staleResponseTtl;
+    private final int staleResponseTtl;
     private final long staleResponseTimeout;
 
     private final Resolver delegate;
@@ -23,10 +23,9 @@ public class CacheResolver implements Resolver, AutoCloseable {
 
     private final ConcurrentMap<String, CachedPacket> cache = new ConcurrentHashMap<>();
 
-    public CacheResolver(final Resolver delegate, final int minTtl, final int staleResponseTtl, final long staleResponseTimeout, final ScheduledExecutorService scheduledExecutorService,
+    public CacheResolver(final Resolver delegate, final int staleResponseTtl, final long staleResponseTimeout, final ScheduledExecutorService scheduledExecutorService,
                          final String cacheFile, final long cacheDelayMinutes) throws IOException {
         this.delegate = delegate;
-        this.minTtl = minTtl;
         this.staleResponseTtl = staleResponseTtl;
         this.staleResponseTimeout = staleResponseTimeout;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -129,14 +128,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
     }
 
     private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final E requestResponse, final Executor executor) {
-        CompletableFuture<E> request = delegate.resolveAsync(requestResponse, executor);
-        if(minTtl > 0) {
-            request = request.thenApply(s -> {
-                s.getResponse().modTtls((ttl) -> Math.max(ttl, minTtl));
-                //s.getResponse().modTtls((ttl) -> 30);
-                return s;
-            });
-        }
+        final CompletableFuture<E> request = delegate.resolveAsync(requestResponse, executor);
         request.thenAcceptAsync(s -> {
             final Packet response = s.getResponse().copy(); // todo: do we need to copy?
             final long currentTime = currentTimeSeconds();

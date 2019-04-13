@@ -2,10 +2,7 @@ package com.moparisthebest.dns;
 
 import com.moparisthebest.dns.listen.Listener;
 import com.moparisthebest.dns.net.ParsedUrl;
-import com.moparisthebest.dns.resolve.BlockingQueueResolver;
-import com.moparisthebest.dns.resolve.CacheResolver;
-import com.moparisthebest.dns.resolve.QueueProcessingResolver;
-import com.moparisthebest.dns.resolve.Resolver;
+import com.moparisthebest.dns.resolve.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,8 +63,11 @@ public class DnsProxy {
         final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
         final CacheResolver resolver = new CacheResolver(
-                new BlockingQueueResolver(packetQueueLength).startQueueProcessingResolvers(executor, queueProcessingResolvers),
-                minTtl, staleResponseTtl, staleResponseTimeout,
+                MinTtlResolver.of(minTtl,
+                    new BlockingQueueResolver(packetQueueLength)
+                            .startQueueProcessingResolvers(executor, queueProcessingResolvers)
+                ),
+                staleResponseTtl, staleResponseTimeout,
                 scheduledExecutorService, cacheFile, cacheDelayMinutes)
                 ;
 
