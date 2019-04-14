@@ -11,8 +11,6 @@ public class BaseRequestResponse implements RequestResponse {
 
     private Packet request, response;
 
-    private String requestPacketKey;
-
     public BaseRequestResponse() {
     }
 
@@ -40,21 +38,10 @@ public class BaseRequestResponse implements RequestResponse {
     }
 
     @Override
-    public String getRequestPacketKey() {
-        return requestPacketKey;
-    }
-
-    @Override
-    public void setRequestPacketKey(final String requestPacketKey) {
-        this.requestPacketKey = requestPacketKey;
-    }
-
-    @Override
     public String toString() {
         return "BaseRequestResponse{" +
                 "request=" + request +
                 ", response=" + response +
-                ", requestPacketKey=" + requestPacketKey +
                 '}';
     }
 }

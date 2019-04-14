@@ -8,10 +8,4 @@ public interface RequestResponse {
     Packet getRequest();
     Packet getResponse();
     void setResponse(Packet response);
-
-    /**
-     * These should only be used by resolvers, may be null
-     */
-    String getRequestPacketKey();
-    void setRequestPacketKey(String key);
 }

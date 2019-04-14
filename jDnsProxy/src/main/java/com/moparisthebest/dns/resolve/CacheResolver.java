@@ -99,8 +99,7 @@ public class CacheResolver extends WrappingResolver {
             final long currentTime = currentTimeSeconds();
             if (response.isExpired(currentTime)) {
                 //System.out.println("cachedPacket isExpired!");
-                requestResponse.setRequestPacketKey(key);
-                final CompletableFuture<E> request = requestAndCache(requestResponse, executor);
+                final CompletableFuture<E> request = requestAndCache(key, requestResponse, executor);
                 final CompletableFuture<E> stale = supplyAsyncOnTimeOut(scheduledExecutorService, staleResponseTimeout, TimeUnit.MILLISECONDS, () -> {
                     requestResponse.setResponse(response.getStaleResponse().setId(requestResponse.getRequest().getId()));
                     return requestResponse;
@@ -113,8 +112,7 @@ public class CacheResolver extends WrappingResolver {
             }
         }
         //System.out.println("no cachedPacket, querying upstream!");
-        requestResponse.setRequestPacketKey(key);
-        return requestAndCache(requestResponse, executor);
+        return requestAndCache(key, requestResponse, executor);
         /*
         // todo: should not have to do this, some upstreams seem to eat stuff though, figure that out, I think readTimeout fixed this
         final CompletableFuture<E> request = requestAndCache(requestResponse);
@@ -125,12 +123,12 @@ public class CacheResolver extends WrappingResolver {
         */
     }
 
-    private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final E requestResponse, final Executor executor) {
+    private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final String key, final E requestResponse, final Executor executor) {
         final CompletableFuture<E> request = delegate.resolveAsync(requestResponse, executor);
         request.thenAcceptAsync(s -> {
             final Packet response = s.getResponse().copy(); // todo: do we need to copy?
             final long currentTime = currentTimeSeconds();
-            cache.put(s.getRequestPacketKey(), new CachedPacket(response, currentTime, currentTime + response.getLowestTtl()));
+            cache.put(key, new CachedPacket(response, currentTime, currentTime + response.getLowestTtl()));
         }, executor);
         return request;
     }
