@@ -37,12 +37,12 @@ public class UdpSync implements Listener {
                 ss.receive(request);
 
                 //System.out.println("got packet");
-                final UdpRequestResponse requestResponse = new UdpRequestResponse(request.getSocketAddress(),
-                        new Packet(ByteBuffer.wrap(request.getData(), request.getOffset(), request.getLength()).slice()));
+                final SocketAddress requester = request.getSocketAddress();
+                final Packet requestPacket = new Packet(ByteBuffer.wrap(request.getData(), request.getOffset(), request.getLength()).slice());
                 //System.out.println(requestResponse);
                 //debugPacket(requestResponse.getRequest().getBuf());
 
-                resolver.resolveAsync(requestResponse, executor).whenCompleteAsync((urr, t) -> {
+                resolver.resolveAsync(requestPacket, executor).whenCompleteAsync((resp, t) -> {
                     if(t != null) {
                         t.printStackTrace();
                         return;
@@ -50,10 +50,10 @@ public class UdpSync implements Listener {
                     //debugPacket(urr.getResponse().getBuf());
 
                     //System.out.println("got response");
-                    final byte[] response = urr.getResponse().getBuf().array();
+                    final byte[] response = resp.getBuf().array();
                     final DatagramPacket responsePacket = new DatagramPacket(response, response.length); // todo: always exact length? meh
 
-                    responsePacket.setSocketAddress(urr.getRequester());
+                    responsePacket.setSocketAddress(requester);
 
                     try {
                         ss.send(responsePacket);

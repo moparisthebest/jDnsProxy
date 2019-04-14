@@ -22,13 +22,12 @@ public class RetryResolver extends WrappingResolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
         // todo: better async way to do this?
-        final CompletableFuture<E> ret = new CompletableFuture<>();
+        final CompletableFuture<Packet> ret = new CompletableFuture<>();
         executor.execute(() -> {
             try {
-                requestResponse.setResponse(resolve(requestResponse.getRequest()));
-                ret.complete(requestResponse);
+                ret.complete(resolve(request));
             } catch (Throwable e) {
                 ret.completeExceptionally(e);
             }

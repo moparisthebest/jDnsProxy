@@ -36,14 +36,13 @@ public class TcpAsync implements Listener {
         this.local = local;
         dnsRequestRead = new FullReadCompletionHandler() {
             @Override
-            public void completed(final BufChan bufChan) {
+            public void completed(final BufChan bc) {
 
                 try {
-                    bufChan.buf.flip();
-                    bufChan.setRequest(new Packet(bufChan.buf));
-                    //debugPacket(bufChan.getRequest().getBuf());
+                    bc.buf.flip();
+                    //debugPacket(new Packet(bc.buf).getBuf());
 
-                    resolver.resolveAsync(bufChan, executor).whenCompleteAsync((bc, t) -> {
+                    resolver.resolveAsync(new Packet(bc.buf), executor).whenCompleteAsync((response, t) -> {
                         //System.out.println("got completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         if(t != null) {
                             t.printStackTrace();
@@ -52,13 +51,13 @@ public class TcpAsync implements Listener {
                         //debugPacket(bc.getResponse().getBuf());
 
                         bc.tcpHead.clear();
-                        bc.tcpHead.putShort((short) bc.getResponse().getBuf().capacity());
+                        bc.tcpHead.putShort((short) response.getBuf().capacity());
                         bc.tcpHead.rewind();
                         bc.buf = bc.tcpHead;
 
                         bc.write((FullWriteCompletionHandler) (bc2) -> {
                             //System.out.println("header write complete");
-                            bc2.buf = bc2.getResponse().getBuf();
+                            bc2.buf = response.getBuf();
                             bc2.buf.rewind();
                             bc2.write((FullWriteCompletionHandler) (unused) -> {
                                 //System.out.println("body write complete");
@@ -69,7 +68,7 @@ public class TcpAsync implements Listener {
                     e.printStackTrace();
                 }
 
-                BufChan.forTcp(bufChan.sock).read(dnsSizeRead);
+                BufChan.forTcp(bc.sock).read(dnsSizeRead);
             }
         };
         dnsSizeRead = bc -> {

@@ -1,6 +1,7 @@
 package com.moparisthebest.dns.resolve;
 
 import com.moparisthebest.dns.Util;
+import com.moparisthebest.dns.dto.Packet;
 
 import java.util.Collection;
 import java.util.List;
@@ -9,11 +10,11 @@ import java.util.stream.Collectors;
 
 public class BlockingQueueResolver implements MultiResolver {
 
-    private final BlockingQueue<RequestResponseCompletableFuture<? extends RequestResponse>> queue;
+    private final BlockingQueue<RequestCompletableFuture> queue;
 
     private final List<QueueProcessingResolver> queueProcessingResolvers;
 
-    public BlockingQueueResolver(final BlockingQueue<RequestResponseCompletableFuture<? extends RequestResponse>> queue, final ExecutorService executor, final Collection<Resolver> delegates) {
+    public BlockingQueueResolver(final BlockingQueue<RequestCompletableFuture> queue, final ExecutorService executor, final Collection<Resolver> delegates) {
         this.queue = queue;
         if (delegates.isEmpty())
             throw new IllegalArgumentException("must supply at least 1 resolver");
@@ -25,10 +26,10 @@ public class BlockingQueueResolver implements MultiResolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        final RequestResponseCompletableFuture<E> request = new RequestResponseCompletableFuture<>(requestResponse);
-        queue.add(request);
-        return request;
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        final RequestCompletableFuture ret = new RequestCompletableFuture(request);
+        queue.add(ret);
+        return ret;
     }
 
     @Override

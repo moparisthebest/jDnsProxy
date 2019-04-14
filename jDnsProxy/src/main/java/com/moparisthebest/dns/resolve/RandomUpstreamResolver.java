@@ -24,8 +24,8 @@ public class RandomUpstreamResolver implements MultiResolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        return random().resolveAsync(requestResponse, executor);
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        return random().resolveAsync(request, executor);
     }
 
     @Override

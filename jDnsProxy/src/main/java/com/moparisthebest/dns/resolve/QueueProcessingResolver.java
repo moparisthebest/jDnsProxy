@@ -3,18 +3,17 @@ package com.moparisthebest.dns.resolve;
 import com.moparisthebest.dns.dto.Packet;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 public class QueueProcessingResolver extends WrappingResolver implements Runnable {
 
     private final ExecutorService executor;
-    private final BlockingQueue<RequestResponseCompletableFuture<? extends RequestResponse>> queue;
+    private final BlockingQueue<RequestCompletableFuture> queue;
 
     private boolean running = false;
     private Thread thisThread = null;
 
-    public QueueProcessingResolver(final Resolver delegate, final ExecutorService executor, final BlockingQueue<RequestResponseCompletableFuture<? extends RequestResponse>> queue) {
+    public QueueProcessingResolver(final Resolver delegate, final ExecutorService executor, final BlockingQueue<RequestCompletableFuture> queue) {
         super(delegate);
         this.executor = executor;
         this.queue = queue;
@@ -28,14 +27,12 @@ public class QueueProcessingResolver extends WrappingResolver implements Runnabl
         if (running)
             try {
                 //System.err.println(name + " getting from queue");
-                @SuppressWarnings("unchecked")
-                final RequestResponseCompletableFuture<RequestResponse> cf = (RequestResponseCompletableFuture<RequestResponse>) queue.take();
-                final RequestResponse requestResponse = cf.getRequestResponse();
+                final RequestCompletableFuture cf = queue.take();
                 //System.err.println(name + " got from queue");
                 Packet response = null;
                 Throwable resolveException = null;
                 try {
-                    response = resolve(requestResponse.getRequest());
+                    response = resolve(cf.getRequest());
                 } catch (Throwable e) {
                     //e.printStackTrace();
                     //System.err.println("FAILURE: " + name + ": " + e.getMessage());
@@ -47,10 +44,9 @@ public class QueueProcessingResolver extends WrappingResolver implements Runnabl
                     // failed
                     cf.completeExceptionally(resolveException == null ? new Exception("SRVFAIL") : resolveException);
                 } else {
-                    requestResponse.setResponse(response);
-                    //System.err.println(name + " got response: " + requestResponse.getResponse());
-                    //System.err.println(name + " completed: " + cf.complete(requestResponse));
-                    cf.complete(requestResponse);
+                    //System.err.println(name + " got response: " + response);
+                    //System.err.println(name + " completed: " + cf.complete(response));
+                    cf.complete(response);
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException("socketresolver take", e);

@@ -1,15 +1,10 @@
 package com.moparisthebest.dns.net;
 
-import com.moparisthebest.dns.dto.Packet;
-import com.moparisthebest.dns.resolve.BaseRequestResponse;
-import com.moparisthebest.dns.resolve.RequestResponse;
-
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.concurrent.CompletableFuture;
 
-public class BufChan extends BaseRequestResponse {
+public class BufChan {
     public final ByteBuffer tcpHead;
     public final AsynchronousSocketChannel sock;
 

@@ -90,8 +90,8 @@ public class CacheResolver extends WrappingResolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        final String key = calcRequestPacketKey(requestResponse.getRequest());
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        final String key = calcRequestPacketKey(request);
         //System.out.println("requestPacketKey: " + key);
         final CachedPacket response = cache.get(key);
         //System.out.println("cachedPacket: " + response);
@@ -99,20 +99,17 @@ public class CacheResolver extends WrappingResolver {
             final long currentTime = currentTimeSeconds();
             if (response.isExpired(currentTime)) {
                 //System.out.println("cachedPacket isExpired!");
-                final CompletableFuture<E> request = requestAndCache(key, requestResponse, executor);
-                final CompletableFuture<E> stale = supplyAsyncOnTimeOut(scheduledExecutorService, staleResponseTimeout, TimeUnit.MILLISECONDS, () -> {
-                    requestResponse.setResponse(response.getStaleResponse().setId(requestResponse.getRequest().getId()));
-                    return requestResponse;
-                });
-                return request.applyToEitherAsync(stale, s -> s);
+                final CompletableFuture<Packet> ret = requestAndCache(key, request, executor);
+                final CompletableFuture<Packet> stale = supplyAsyncOnTimeOut(scheduledExecutorService, staleResponseTimeout, TimeUnit.MILLISECONDS,
+                        () -> response.getStaleResponse().setId(request.getId()));
+                return ret.applyToEitherAsync(stale, s -> s);
             } else {
                 //System.out.println("cachedPacket returning from cache!");
-                requestResponse.setResponse(response.getResponse(currentTime).setId(requestResponse.getRequest().getId()));
-                return CompletableFuture.completedFuture(requestResponse);
+                return CompletableFuture.completedFuture(response.getResponse(currentTime).setId(request.getId()));
             }
         }
         //System.out.println("no cachedPacket, querying upstream!");
-        return requestAndCache(key, requestResponse, executor);
+        return requestAndCache(key, request, executor);
         /*
         // todo: should not have to do this, some upstreams seem to eat stuff though, figure that out, I think readTimeout fixed this
         final CompletableFuture<E> request = requestAndCache(requestResponse);
@@ -123,14 +120,14 @@ public class CacheResolver extends WrappingResolver {
         */
     }
 
-    private <E extends RequestResponse> CompletableFuture<E> requestAndCache(final String key, final E requestResponse, final Executor executor) {
-        final CompletableFuture<E> request = delegate.resolveAsync(requestResponse, executor);
-        request.thenAcceptAsync(s -> {
-            final Packet response = s.getResponse().copy(); // todo: do we need to copy?
+    private CompletableFuture<Packet> requestAndCache(final String key, final Packet request, final Executor executor) {
+        final CompletableFuture<Packet> ret = delegate.resolveAsync(request, executor);
+        ret.thenAcceptAsync(s -> {
+            final Packet response = s.copy(); // todo: do we need to copy?
             final long currentTime = currentTimeSeconds();
             cache.put(key, new CachedPacket(response, currentTime, currentTime + response.getLowestTtl()));
         }, executor);
-        return request;
+        return ret;
     }
 
     public void persistCache(final File file, final Map<String, CachedPacket> cache) throws IOException {

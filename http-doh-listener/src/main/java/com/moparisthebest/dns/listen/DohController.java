@@ -1,13 +1,10 @@
 package com.moparisthebest.dns.listen;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Base64;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import com.moparisthebest.dns.dto.Packet;
-import com.moparisthebest.dns.resolve.BaseRequestResponse;
 import com.moparisthebest.dns.resolve.Resolver;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

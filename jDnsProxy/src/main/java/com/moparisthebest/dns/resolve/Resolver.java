@@ -17,17 +17,15 @@ public interface Resolver extends AutoCloseable {
 
     /**
      * This must return immediately and resolve the DNS query in the background, using the given executor
-     * @param requestResponse
+     * @param request
      * @param executor
-     * @param <E>
      * @return
      */
-    default <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        final CompletableFuture<E> ret = new CompletableFuture<>();
+    default CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        final CompletableFuture<Packet> ret = new CompletableFuture<>();
         executor.execute(() -> {
             try {
-                requestResponse.setResponse(resolve(requestResponse.getRequest()));
-                ret.complete(requestResponse);
+                ret.complete(resolve(request));
             } catch (Throwable e) {
                 ret.completeExceptionally(e);
             }
@@ -42,7 +40,7 @@ public interface Resolver extends AutoCloseable {
      * @throws Exception
      */
     default Packet resolve(final Packet request) throws Exception {
-        return resolveAsync(new BaseRequestResponse(request), Runnable::run).get().getResponse();
+        return resolveAsync(request, Runnable::run).get();
     }
 
     default void close() {

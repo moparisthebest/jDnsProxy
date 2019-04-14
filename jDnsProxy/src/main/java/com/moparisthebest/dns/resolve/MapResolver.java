@@ -21,11 +21,8 @@ public class MapResolver extends WrappingResolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        return delegate.resolveAsync(requestResponse, executor).thenApply(s -> {
-                s.setResponse(mapper.apply(s.getResponse()));
-                return s;
-            });
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        return delegate.resolveAsync(request, executor).thenApply(mapper);
     }
 
     @Override

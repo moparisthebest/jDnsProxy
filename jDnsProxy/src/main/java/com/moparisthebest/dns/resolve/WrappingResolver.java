@@ -16,8 +16,8 @@ public abstract class WrappingResolver implements Resolver {
     }
 
     @Override
-    public <E extends RequestResponse> CompletableFuture<E> resolveAsync(final E requestResponse, final Executor executor) {
-        return delegate.resolveAsync(requestResponse, executor);
+    public CompletableFuture<Packet> resolveAsync(final Packet request, final Executor executor) {
+        return delegate.resolveAsync(request, executor);
     }
 
     @Override

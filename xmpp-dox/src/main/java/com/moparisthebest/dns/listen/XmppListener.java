@@ -2,7 +2,6 @@ package com.moparisthebest.dns.listen;
 
 import com.moparisthebest.dns.dto.Packet;
 import com.moparisthebest.dns.net.ParsedUrl;
-import com.moparisthebest.dns.resolve.BaseRequestResponse;
 import com.moparisthebest.dns.resolve.Resolver;
 import com.moparisthebest.dns.xmpp.ConnectionDetails;
 import com.moparisthebest.dns.xmpp.DnsIq;
@@ -49,16 +48,15 @@ public class XmppListener implements Listener {
                         final byte[] request = DnsIq.parseDnsIq(req);
                         if (request != null) {
                             //System.out.println("good request: " + req);
-                            final XmppRequestResponse requestResponse = new XmppRequestResponse(req.getFrom(), new Packet(request));
 
-                            resolver.resolveAsync(requestResponse, executor).whenCompleteAsync((urr, t) -> {
+                            resolver.resolveAsync(new Packet(request), executor).whenCompleteAsync((urr, t) -> {
                                 if (t != null) {
                                     t.printStackTrace();
                                     return;
                                 }
                                 //debugPacket(urr.getResponse().getBuf());
 
-                                final IQ resp = DnsIq.responseFor(req, urr.getResponse().getBuf());
+                                final IQ resp = DnsIq.responseFor(req, urr.getBuf());
 
                                 try {
                                     //System.out.println("dns response: " + resp.toString());
@@ -128,26 +126,5 @@ public class XmppListener implements Listener {
         running = false;
         if (thisThread != null)
             thisThread.interrupt();
-    }
-
-    public class XmppRequestResponse extends BaseRequestResponse {
-
-        private final Jid requester;
-
-        public XmppRequestResponse(final Jid requester, final Packet request) {
-            super(request);
-            this.requester = requester;
-        }
-
-        public Jid getRequester() {
-            return requester;
-        }
-
-        @Override
-        public String toString() {
-            return "XmppRequestResponse{" +
-                    "requester=" + requester +
-                    "} " + super.toString();
-        }
     }
 }
