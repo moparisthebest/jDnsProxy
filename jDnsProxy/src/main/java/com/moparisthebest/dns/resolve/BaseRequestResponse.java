@@ -11,9 +11,7 @@ public class BaseRequestResponse implements RequestResponse {
 
     private Packet request, response;
 
-    private CompletableFuture<? extends RequestResponse> completableFuture;
     private String requestPacketKey;
-    private int failureCount;
 
     public BaseRequestResponse() {
     }
@@ -42,16 +40,6 @@ public class BaseRequestResponse implements RequestResponse {
     }
 
     @Override
-    public CompletableFuture<? extends RequestResponse> getCompletableFuture() {
-        return completableFuture;
-    }
-
-    @Override
-    public void setCompletableFuture(final CompletableFuture<? extends RequestResponse> completableFuture) {
-        this.completableFuture = completableFuture;
-    }
-
-    @Override
     public String getRequestPacketKey() {
         return requestPacketKey;
     }
@@ -62,18 +50,11 @@ public class BaseRequestResponse implements RequestResponse {
     }
 
     @Override
-    public final int getAndIncrementFailureCount() {
-        return ++failureCount;
-    }
-
-    @Override
     public String toString() {
         return "BaseRequestResponse{" +
                 "request=" + request +
                 ", response=" + response +
-                ", completableFuture=" + completableFuture +
                 ", requestPacketKey=" + requestPacketKey +
-                ", failureCount=" + failureCount +
                 '}';
     }
 }

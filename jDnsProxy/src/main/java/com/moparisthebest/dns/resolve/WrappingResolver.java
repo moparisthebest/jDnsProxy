@@ -2,15 +2,16 @@ package com.moparisthebest.dns.resolve;
 
 import com.moparisthebest.dns.dto.Packet;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class DelegatingQueueProcessingResolver extends AbstractQueueProcessingResolver {
+public abstract class WrappingResolver implements Resolver {
 
-    private final Resolver delegate;
+    protected final Resolver delegate;
 
-    public DelegatingQueueProcessingResolver(final int maxRetries, final String name, final Resolver delegate) {
-        super(maxRetries, name);
+    public WrappingResolver(final Resolver delegate) {
+        Objects.requireNonNull(delegate);
         this.delegate = delegate;
     }
 
@@ -24,9 +25,5 @@ public class DelegatingQueueProcessingResolver extends AbstractQueueProcessingRe
         return delegate.resolve(request);
     }
 
-    @Override
-    public void close() {
-        super.close();
-        delegate.close();
-    }
+    // we don't call delegate.close() on purpose, whatever created it should close it
 }

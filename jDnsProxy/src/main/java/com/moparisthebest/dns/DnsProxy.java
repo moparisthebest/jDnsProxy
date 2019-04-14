@@ -48,25 +48,29 @@ public class DnsProxy {
         final String cacheFile = config.get("cacheFile");
         final long cacheDelayMinutes = Long.parseLong(config.getOrDefault("cacheDelayMinutes", "60"));
 
-        final String[] resolvers = config.getOrDefault("resolvers", "https://dns.google.com/experimental?ct#name=dns.google.com").split("\\s+");
-        if (!config.containsKey("maxRetries"))
-            config.put("maxRetries", String.valueOf(resolvers.length * 2));
+        final String[] resolverUrls = config.getOrDefault("resolvers", "https://dns.google.com/experimental?ct#name=dns.google.com").split("\\s+");
 
-        //System.out.println("resolvers: " + Arrays.toString(resolvers));
+        final int maxRetries = Integer.parseInt(config.getOrDefault("maxRetries", String.valueOf(resolverUrls.length * 2)));
 
-        final List<QueueProcessingResolver> queueProcessingResolvers = Arrays.stream(resolvers).map(s -> ParsedUrl.of(s, config)).map(QueueProcessingResolver::of).collect(Collectors.toList());
-        //final List<QueueProcessingResolver> queueProcessingResolvers = new ArrayList<>();
-        //queueProcessingResolvers.add(new SocketResolver(5, "socket1", SocketFactory.getDefault(), new InetSocketAddress("8.8.4.4", 53)));
-        //queueProcessingResolvers.add(new HttpResolver(5, "http1", "https://dns.google.com/experimental?ct"));
+        //System.out.println("resolverUrls: " + Arrays.toString(resolverUrls));
+
+        final List<Resolver> resolvers = Arrays.stream(resolverUrls).map(s -> ParsedUrl.of(s, config)).map(Resolver::of).collect(Collectors.toList());
+        //final List<QueueProcessingResolver> resolvers = new ArrayList<>();
+        //resolvers.add(new SocketResolver(5, "socket1", SocketFactory.getDefault(), new InetSocketAddress("8.8.4.4", 53)));
+        //resolvers.add(new HttpResolver(5, "http1", "https://dns.google.com/experimental?ct"));
 
         final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(40);
         final ExecutorService executor = scheduledExecutorService;//ForkJoinPool.commonPool();
 
+        /*
+        final Resolver multiResolver = MultiResolver.of(packetQueueLength, executor, resolvers);
+        final Resolver resolver = RetryResolver.of(maxRetries, multiResolver);
+        */
+
+        final Resolver multiResolver = MultiResolver.of(packetQueueLength, executor, resolvers);
+
         final CacheResolver resolver = new CacheResolver(
-                MapResolver.minTtl(minTtl,
-                    new BlockingQueueResolver(packetQueueLength)
-                            .startQueueProcessingResolvers(executor, queueProcessingResolvers)
-                ),
+                MapResolver.minTtl(minTtl, RetryResolver.of(maxRetries, multiResolver)),
                 staleResponseTtl, staleResponseTimeout,
                 scheduledExecutorService, cacheFile, cacheDelayMinutes)
                 ;
@@ -84,9 +88,10 @@ public class DnsProxy {
             //if(true) return;
             executor.shutdown();
             scheduledExecutorService.shutdown();
-            queueProcessingResolvers.forEach(Util::tryClose);
             listeners.forEach(Util::tryClose);
             tryClose(resolver);
+            tryClose(multiResolver);
+            resolvers.forEach(Util::tryClose);
             System.out.println("shutdown complete");
         });
 

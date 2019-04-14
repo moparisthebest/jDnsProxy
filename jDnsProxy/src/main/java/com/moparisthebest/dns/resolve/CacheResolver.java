@@ -12,12 +12,10 @@ import java.util.concurrent.*;
 
 import static com.moparisthebest.dns.Util.supplyAsyncOnTimeOut;
 
-public class CacheResolver implements Resolver, AutoCloseable {
+public class CacheResolver extends WrappingResolver {
 
     private final int staleResponseTtl;
     private final long staleResponseTimeout;
-
-    private final Resolver delegate;
 
     private final ScheduledExecutorService scheduledExecutorService;
 
@@ -25,7 +23,7 @@ public class CacheResolver implements Resolver, AutoCloseable {
 
     public CacheResolver(final Resolver delegate, final int staleResponseTtl, final long staleResponseTimeout, final ScheduledExecutorService scheduledExecutorService,
                          final String cacheFile, final long cacheDelayMinutes) throws IOException {
-        this.delegate = delegate;
+        super(delegate);
         this.staleResponseTtl = staleResponseTtl;
         this.staleResponseTimeout = staleResponseTimeout;
         this.scheduledExecutorService = scheduledExecutorService;

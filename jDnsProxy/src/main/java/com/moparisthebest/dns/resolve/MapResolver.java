@@ -6,9 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public class MapResolver implements Resolver {
+public class MapResolver extends WrappingResolver {
 
-    private final Resolver delegate;
     private final Function<? super Packet, ? extends Packet> mapper;
 
     public static Resolver minTtl(final int minTtl, final Resolver delegate) {
@@ -17,7 +16,7 @@ public class MapResolver implements Resolver {
     }
 
     private MapResolver(final Resolver delegate, final Function<? super Packet, ? extends Packet> mapper) {
-        this.delegate = delegate;
+        super(delegate);
         this.mapper = mapper;
     }
 
