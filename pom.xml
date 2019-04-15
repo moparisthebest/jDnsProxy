@@ -51,6 +51,7 @@
         <module>jDnsProxy</module>
         <module>xmpp-dox</module>
         <module>http-doh-listener</module>
+        <module>jDnsProxy-all</module>
     </modules>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -61,7 +62,6 @@
                 <configuration>
                     <compilerArgs>
                         <compilerArg>-Xlint:all</compilerArg>
-                        <compilerArg>-Werror</compilerArg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -78,7 +78,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -88,6 +88,7 @@
                         <configuration>
                             <minimizeJar>false</minimizeJar>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputFile>${project.build.directory}/${project.artifactId}-full.jar</outputFile>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -98,6 +99,12 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.moparisthebest.dns.DnsProxy</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
