@@ -1,13 +1,10 @@
 package com.moparisthebest.dns.net;
 
-import eu.geekplace.javapinning.java7.Java7Pinning;
-
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.*;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
+import static com.moparisthebest.dns.tls.PinnedPubKeyTrustManager.pinSha256SSLContext;
 
 public class ParsedUrl {
 
@@ -57,18 +54,7 @@ public class ParsedUrl {
             SSLSocketFactory sslSocketFactory = null;
             final String pubKeyPinsSha256 = props.get("pubKeyPinsSha256");
             if (pubKeyPinsSha256 != null) {
-                final String[] pins = pubKeyPinsSha256.split(",");
-                // todo: ugh java-pinning only supports hex not base64 *and* hashes the cert one time per pin, fix this
-                for (int x = 0; x < pins.length; ++x) {
-                    pins[x] = "SHA256:" + bytesToHex(Base64.getDecoder().decode(pins[x]));
-                }
-                final SSLContext sslContext;
-                try {
-                    sslContext = Java7Pinning.forPins(pins);
-                } catch (KeyManagementException | NoSuchAlgorithmException e) {
-                    throw new RuntimeException("invalid pins", e);
-                }
-                sslSocketFactory = sslContext.getSocketFactory();
+                sslSocketFactory = pinSha256SSLContext(pubKeyPinsSha256.split(",")).getSocketFactory();
             }
             if(sslSocketFactory == null && url.getScheme().equals("tls"))
                 sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
