@@ -17,7 +17,13 @@ mvn clean package
 java -jar jDnsProxy/target/jDnsProxy.jar ./jdnsproxy.properties
 
 # or with xmpp:// listener+resolver support:
-java -cp jDnsProxy/target/jDnsProxy.jar:xmpp-dox/target/xmpp-dox.jar com.moparisthebest.dns.DnsProxy xmpp-dox/jdnsproxy.xmpp.resolver.properties
+java -jar xmpp-dox/target/xmpp-dox-full.jar ./xmpp-dox/jdnsproxy.xmpp.resolver.properties
+
+# or with http:// listener support:
+java -jar http-doh-listener/target/http-doh-listener-full.jar ./jdnsproxy.properties
+
+# or with support for *everything* we support in this repo (other jars we don't know about can also add additional protocol support)
+java -jar jDnsProxy-all/target/jDnsProxy-all.jar ./jdnsproxy.properties
 ```
 
 Implemented specs:
