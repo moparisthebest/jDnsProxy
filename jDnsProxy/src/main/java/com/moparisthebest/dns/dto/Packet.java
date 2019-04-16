@@ -1,10 +1,7 @@
 package com.moparisthebest.dns.dto;
 
-import com.moparisthebest.dns.DnsProxy;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -249,11 +246,6 @@ public class Packet extends AbstractBufferWindow {
         return copy;
     }
 
-    public String getDohBase64() {
-        // todo: remove trailing equals, this goes outside limit...
-        return Base64.getUrlEncoder().encodeToString(getBuf().array());
-    }
-
     @Override
     public String toString() {
         return "Packet{" +
@@ -281,7 +273,6 @@ public class Packet extends AbstractBufferWindow {
                 ", start=" + getStart() +
                 ", end=" + getEnd() +
                 ", length=" + getLength() +
-                //", dohBase64=" + getDohBase64() +
                 '}';
     }
 }
