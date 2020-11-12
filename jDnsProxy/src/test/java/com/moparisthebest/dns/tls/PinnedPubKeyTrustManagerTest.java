@@ -17,12 +17,12 @@ public class PinnedPubKeyTrustManagerTest {
     @Test
     public void pinSha256SSLContext() {
         // todo: make these not rely on remote server, stand up local TLS server with hard-coded certs?
-        assertEquals("pinnedpubkey authentication failed, server pin (SHA-256): t62CeU2tQiqkexU74Gxa2eg7fRbEgoChTociMee9wno=",
+        assertEquals("pinnedpubkey authentication failed, server pin (SHA-256): fYQPv1BOUFcIGTz3W+FwhhI6x+S3VD3aMxMl1JyO4ow=",
                 testPin("moparisthebest.com", 443, "bla").getCause().getMessage());
-        assertEquals("pinnedpubkey authentication failed, server pin (SHA-256): t62CeU2tQiqkexU74Gxa2eg7fRbEgoChTociMee9wno=",
+        assertEquals("pinnedpubkey authentication failed, server pin (SHA-256): fYQPv1BOUFcIGTz3W+FwhhI6x+S3VD3aMxMl1JyO4ow=",
                 testPin("moparisthebest.com", 443, "eEHQC9au2QRAP1FnvcYEsmvXT7511EXQ2gw8ppBfseM=").getCause().getMessage());
         assertEquals("read: 1024",
-                testPin("moparisthebest.com", 443, "t62CeU2tQiqkexU74Gxa2eg7fRbEgoChTociMee9wno=").getMessage());
+                testPin("moparisthebest.com", 443, "fYQPv1BOUFcIGTz3W+FwhhI6x+S3VD3aMxMl1JyO4ow=").getMessage());
     }
 
     private static Exception testPin(final String hostname, final int port, final String... sha256Pins) {
