@@ -1,0 +1,31 @@
+properties(
+    [
+        disableConcurrentBuilds()
+    ]
+)
+
+node('linux && docker') {
+    try {
+    stage('Checkout') {
+        checkout scm
+
+        //branch name from Jenkins environment variables
+        echo "My branch is: ${env.BRANCH_NAME}"
+    }
+
+    stage('Build + Deploy') {
+    try {
+        sh 'docker run --rm -v "$HOME/.m2:/m2" -v "$HOME/.npm:/npm" -v "$PWD:/build" -e BRANCH_NAME -e BUILD_UID=$UID -e BUILD_GID=$(id -g) moparisthebest/java-ci:latest'
+        currentBuild.result = 'SUCCESS'
+    } catch (Exception err) {
+        currentBuild.result = 'FAILURE'
+    }
+    }
+
+    stage('Email') {
+        step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'admin.code@moparisthebest.com', sendToIndividuals: true])
+    }
+    } finally {
+        deleteDir()
+    }
+}
