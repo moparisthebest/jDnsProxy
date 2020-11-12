@@ -1,5 +1,8 @@
 jDnsProxy
 ---------
+
+[![Build Status](https://ci.moparisthe.best/job/moparisthebest/job/jDnsProxy/job/master/badge/icon%3Fstyle=plastic)](https://ci.moparisthe.best/job/moparisthebest/job/jDnsProxy/job/master/)
+
 Simple fast and lightweight DNS proxy and cache that listens on TCP or UDP ports and relays the request
 to various upstream [DNS-over-TCP](https://tools.ietf.org/html/rfc1035), [DNS-over-TLS](https://tools.ietf.org/html/rfc7858),
 or [DNS-over-HTTPS](https://tools.ietf.org/html/draft-hoffman-dns-over-https) servers, optionally over http or socks 
